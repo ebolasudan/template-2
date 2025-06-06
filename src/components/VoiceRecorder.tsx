@@ -1,56 +1,102 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useDeepgram } from '../lib/contexts/DeepgramContext';
-import { addDocument } from '../lib/firebase/firebaseUtils';
 import { motion } from 'framer-motion';
+import { useVoiceRecording } from '@/lib/hooks/useVoiceRecording';
+import { Mic, MicOff, Loader2 } from 'lucide-react';
 
-export default function VoiceRecorder() {
-  const [isRecording, setIsRecording] = useState(false);
-  const { connectToDeepgram, disconnectFromDeepgram, connectionState, realtimeTranscript } = useDeepgram();
+interface VoiceRecorderProps {
+  onSaveNote?: (transcript: string) => Promise<void>;
+  autoSave?: boolean;
+  className?: string;
+}
 
-  const handleStartRecording = async () => {
-    await connectToDeepgram();
-    setIsRecording(true);
-  };
-
-  const handleStopRecording = async () => {
-    disconnectFromDeepgram();
-    setIsRecording(false);
-    
-    // Save the note to Firebase
-    if (realtimeTranscript) {
-      await addDocument('notes', {
-        text: realtimeTranscript,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  };
+export default function VoiceRecorder({ 
+  onSaveNote, 
+  autoSave = true,
+  className = ''
+}: VoiceRecorderProps) {
+  const {
+    isRecording,
+    isSaving,
+    error,
+    transcript,
+    toggleRecording,
+  } = useVoiceRecording({ onSaveNote, autoSave });
 
   return (
-    <div className="w-full max-w-md">
+    <div className={`w-full max-w-md ${className}`}>
       <button
-        onClick={isRecording ? handleStopRecording : handleStartRecording}
-        className={`w-full py-2 px-4 rounded-full ${
-          isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-        } text-white font-bold`}
+        onClick={toggleRecording}
+        disabled={isSaving}
+        className={`
+          w-full py-3 px-6 rounded-full font-semibold text-white
+          transition-all duration-200 transform hover:scale-105
+          disabled:opacity-50 disabled:cursor-not-allowed
+          ${isRecording 
+            ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
+            : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
+          }
+        `}
+        aria-label={isRecording ? 'Stop recording' : 'Start recording'}
       >
-        {isRecording ? 'Stop Recording' : 'Start Recording'}
+        <span className="flex items-center justify-center gap-2">
+          {isSaving ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Saving...
+            </>
+          ) : isRecording ? (
+            <>
+              <MicOff className="w-5 h-5" />
+              Stop Recording
+            </>
+          ) : (
+            <>
+              <Mic className="w-5 h-5" />
+              Start Recording
+            </>
+          )}
+        </span>
       </button>
+
+      {/* Error display */}
+      {error && (
+        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Recording indicator and transcript */}
       {isRecording && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="w-8 h-8 bg-blue-500 rounded-full mx-auto mb-4"
-          />
-          <p className="text-sm text-gray-600">{realtimeTranscript}</p>
+        <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex items-center justify-center mb-3">
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="w-3 h-3 bg-red-500 rounded-full"
+            />
+            <span className="ml-2 text-sm text-gray-600">Recording...</span>
+          </div>
+          
+          {transcript && (
+            <div className="mt-3 p-3 bg-white rounded border border-gray-100">
+              <p className="text-sm text-gray-700 leading-relaxed">{transcript}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Saving indicator */}
+      {isSaving && (
+        <div className="mt-3 flex items-center justify-center text-sm text-gray-600">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Saving your note...
         </div>
       )}
     </div>

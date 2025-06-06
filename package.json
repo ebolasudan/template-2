@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "clean": "rm -rf .next node_modules/.cache",
+    "clean:all": "rm -rf .next node_modules package-lock.json && npm install",
+    "analyze": "ANALYZE=true next build",
+    "check:env": "node -e \"require('./src/lib/env')\" && echo '✅ Environment variables validated'",
+    "create:component": "node scripts/create-component.js",
+    "create:api": "node scripts/create-api-route.js",
+    "prepare": "node scripts/setup.js"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.48",

@@ -1,15 +1,222 @@
-# Ansh & Riley Full-Stack Template
+# Full-Stack AI Application Template
 
-This is a full-stack template project for Software Composers to create  applications with AI.
+A modern, production-ready template for building AI-powered applications with Next.js 14, TypeScript, and multiple AI service integrations.
 
-## Getting started
-To create a new project, you go to `/paths`, choose from our list of Paths, and then use Cursor's Composer feature to quickly scaffold your project!
+## 🚀 Features
 
-You can also edit the Path's prompt template to be whatever you like!
+- **Next.js 14 App Router** - Latest React framework with server components
+- **TypeScript** - Type-safe development experience
+- **Multiple AI Integrations**:
+  - OpenAI GPT-4o for chat completions
+  - Anthropic Claude 3.5 Sonnet for advanced reasoning
+  - Replicate Stable Diffusion for image generation
+  - Deepgram for real-time audio transcription
+- **Firebase Suite**:
+  - Authentication with Google Sign-In
+  - Firestore for data persistence
+  - Firebase Storage for file uploads
+- **Tailwind CSS** - Utility-first styling
+- **Vercel AI SDK** - Streaming AI responses
+- **Pre-built Components** - Voice recorder, image upload, authentication
 
-## Technologies used
-This doesn't really matter, but is useful for the AI to understand more about this project. We are using the following technologies
-- React with Next.js 14 App Router
-- TailwindCSS
-- Firebase Auth, Storage, and Database
-- Multiple AI endpoints including OpenAI, Anthropic, and Replicate using Vercel's AI SDK
+## 📋 Prerequisites
+
+- Node.js 18+ and npm
+- Firebase project with Authentication, Firestore, and Storage enabled
+- API keys for AI services you plan to use
+
+## 🛠️ Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd template-2
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   
+   Create a `.env.local` file in the root directory:
+   ```env
+   # Firebase Configuration
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+
+   # AI Service API Keys
+   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+   REPLICATE_API_TOKEN=your_replicate_api_token
+   DEEPGRAM_API_KEY=your_deepgram_api_key
+   ```
+
+4. **Configure Firebase**
+   - Enable Google Authentication in Firebase Console
+   - Set up Firestore Database
+   - Configure Storage rules for your use case
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) to see your application.
+
+## 🏗️ Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── anthropic/     # Claude chat endpoint
+│   │   ├── deepgram/      # Audio transcription
+│   │   ├── openai/        # GPT chat & transcription
+│   │   └── replicate/     # Image generation
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── ImageUpload.tsx    # Image upload component
+│   ├── SignInWithGoogle.tsx # Authentication component
+│   └── VoiceRecorder.tsx  # Audio recording component
+└── lib/                   # Utilities and configuration
+    ├── contexts/          # React contexts
+    │   ├── AuthContext.tsx    # Authentication state
+    │   └── DeepgramContext.tsx # Deepgram client
+    ├── firebase/          # Firebase configuration
+    │   ├── firebase.ts    # Firebase initialization
+    │   └── firebaseUtils.ts # Helper functions
+    └── hooks/             # Custom React hooks
+        └── useAuth.ts     # Authentication hook
+```
+
+## 🔧 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## 📚 API Endpoints
+
+### Chat Completions
+- **POST `/api/openai/chat`** - Stream chat responses from GPT-4o
+- **POST `/api/anthropic/chat`** - Stream chat responses from Claude 3.5 Sonnet
+
+### Image Generation
+- **POST `/api/replicate/generate-image`** - Generate images with Stable Diffusion
+  ```json
+  {
+    "prompt": "A beautiful sunset",
+    "width": 512,
+    "height": 512,
+    "num_inference_steps": 25,
+    "guidance_scale": 7.5
+  }
+  ```
+
+### Audio Services
+- **GET `/api/deepgram`** - Get Deepgram API key for client-side transcription
+- **POST `/api/openai/transcribe`** - Transcribe audio files
+
+## 🚀 Quick Start Templates
+
+The `/paths` directory contains starter templates for common AI applications:
+
+- **`chat.md`** - AI chatbot application
+- **`image-generation.md`** - AI image generator
+- **`social-media.md`** - Social media content creator
+- **`voice-notes.md`** - Voice note transcription app
+
+### Using Templates with Cursor
+
+1. Open the project in Cursor
+2. Navigate to `/paths/` and choose a template
+3. Use Cursor's Composer feature with the template prompt
+4. The AI will scaffold your application based on the template
+
+## 🔐 Authentication
+
+Firebase Authentication is pre-configured with Google Sign-In:
+
+```tsx
+import { useAuth } from '@/lib/hooks/useAuth';
+
+function MyComponent() {
+  const { user, signIn, signOut } = useAuth();
+  
+  if (!user) {
+    return <SignInWithGoogle />;
+  }
+  
+  // User is authenticated
+}
+```
+
+## 🎨 Styling
+
+This template uses Tailwind CSS for styling. The configuration is in `tailwind.config.ts`.
+
+```tsx
+// Example component with Tailwind classes
+<div className="flex items-center justify-center min-h-screen bg-gray-100">
+  <h1 className="text-4xl font-bold text-gray-900">Hello World</h1>
+</div>
+```
+
+## 📝 Environment Variables
+
+### Required Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_FIREBASE_*` | Firebase configuration | Yes |
+| `OPENAI_API_KEY` | OpenAI API key | If using OpenAI |
+| `ANTHROPIC_API_KEY` | Anthropic API key | If using Claude |
+| `REPLICATE_API_TOKEN` | Replicate API token | If using image generation |
+| `DEEPGRAM_API_KEY` | Deepgram API key | If using transcription |
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- AI integrations powered by [Vercel AI SDK](https://sdk.vercel.ai/)
+- Authentication by [Firebase](https://firebase.google.com/)
+- Styling with [Tailwind CSS](https://tailwindcss.com/)
+
+## 💡 Tips
+
+- Keep your API keys secure and never commit them to version control
+- Configure Firebase Security Rules appropriately for production
+- Use the provided components as starting points and customize as needed
+- Leverage the Vercel AI SDK for easy streaming implementations
+- Check the `/paths` directory for application ideas and templates
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **API Key Errors**: Ensure all required environment variables are set
+2. **Firebase Errors**: Check Firebase project configuration and enabled services
+3. **Build Errors**: Run `npm run lint` to check for code issues
+4. **CORS Issues**: Verify API routes are properly configured
+
+For more help, check the [Next.js documentation](https://nextjs.org/docs) or file an issue in the repository.
