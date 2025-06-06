@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, memo, useMemo } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { theme } from '@/styles/theme';
@@ -73,7 +73,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       xl: 'gap-3',
     };
 
-    const baseStyles = `
+    // Memoize the computed styles to prevent recreation on every render
+    const baseStyles = useMemo(() => `
       inline-flex items-center justify-center font-medium
       rounded-lg transition-all duration-200
       focus:outline-none focus:ring-2 focus:ring-offset-2
@@ -82,20 +83,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ${variantStyles[variant]}
       ${sizeStyles[size]}
       ${iconSpacing[size]}
-    `;
+    `, [variant, size, fullWidth]);
+    
+    // Memoize motion props to prevent recreation
+    const motionProps = useMemo(() => ({
+      whileHover: { scale: disabled || isLoading ? 1 : 1.02 },
+      whileTap: { scale: disabled || isLoading ? 1 : 0.98 },
+      transition: {
+        type: 'spring' as const,
+        stiffness: 400,
+        damping: 17,
+      },
+    }), [disabled, isLoading]);
 
     return (
       <motion.button
         ref={ref}
         className={`${baseStyles} ${className}`}
         disabled={disabled || isLoading}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 17,
-        }}
+        {...motionProps}
         {...props}
       >
         {isLoading ? (
@@ -110,4 +116,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = 'Button';
 
-export default Button;
+// Memoize the Button component to prevent unnecessary re-renders when props haven't changed
+const MemoizedButton = memo(Button);
+MemoizedButton.displayName = 'Button';
+
+export default MemoizedButton;

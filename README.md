@@ -5,17 +5,31 @@ A modern, production-ready template for building AI-powered applications with Ne
 ## 🚀 Features
 
 - **Next.js 14 App Router** - Latest React framework with server components
-- **TypeScript** - Type-safe development experience
+- **TypeScript** - Type-safe development experience with comprehensive validation
 - **Multiple AI Integrations**:
   - OpenAI GPT-4o for chat completions
   - Anthropic Claude 3.5 Sonnet for advanced reasoning
   - LM Studio for local LLM inference (privacy-focused)
   - Replicate Stable Diffusion for image generation
   - Deepgram for real-time audio transcription
+  - **Smart AI Router** - Intelligent provider selection with automatic failover
 - **Firebase Suite**:
   - Authentication with Google Sign-In
+  - **Production JWT Verification** - Secure server-side authentication
   - Firestore for data persistence
   - Firebase Storage for file uploads
+- **Security & Validation**:
+  - **Comprehensive Input Sanitization** - XSS prevention with DOMPurify
+  - **Zod Schema Validation** - Type-safe API request validation
+  - **Rate Limiting** - Built-in protection against abuse
+- **Performance Optimizations**:
+  - **React Memoization** - Optimized component rendering
+  - **Bundle Splitting** - Smart code chunking and caching
+  - **Async Boundaries** - Consistent loading and error states
+- **Developer Experience**:
+  - **Comprehensive Documentation** - JSDoc comments with examples
+  - **Enhanced Error Handling** - Detailed error context and request tracking
+  - **Bundle Analysis** - Webpack analyzer integration
 - **Tailwind CSS** - Utility-first styling
 - **Vercel AI SDK** - Streaming AI responses
 - **Pre-built Components** - Voice recorder, image upload, authentication
@@ -60,6 +74,14 @@ A modern, production-ready template for building AI-powered applications with Ne
    # LM Studio (for local LLM inference)
    LM_STUDIO_BASE_URL=http://localhost:1234
    LM_STUDIO_API_KEY=optional_api_key
+   
+   # Firebase Admin (for JWT verification)
+   FIREBASE_ADMIN_PROJECT_ID=your_firebase_project_id
+   FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   FIREBASE_ADMIN_CLIENT_EMAIL=your_service_account@your_project.iam.gserviceaccount.com
+   
+   # Redis (optional, for advanced caching)
+   REDIS_URL=redis://localhost:6379
    ```
 
 4. **Configure Firebase**
@@ -108,6 +130,11 @@ src/
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run typecheck` - Type checking with TypeScript
+- `npm run analyze` - Bundle analysis with webpack analyzer
+- `npm run check:env` - Validate environment variables
+- `npm run create:component` - Generate new component with templates
+- `npm run create:api` - Generate new API route with templates
 
 ## 📚 API Endpoints
 
@@ -150,10 +177,12 @@ The `/paths` directory contains starter templates for common AI applications:
 
 ## 🔐 Authentication
 
+### Client-Side Authentication
 Firebase Authentication is pre-configured with Google Sign-In:
 
 ```tsx
 import { useAuth } from '@/lib/hooks/useAuth';
+import { SignInWithGoogle } from '@/components';
 
 function MyComponent() {
   const { user, signIn, signOut } = useAuth();
@@ -162,8 +191,126 @@ function MyComponent() {
     return <SignInWithGoogle />;
   }
   
-  // User is authenticated
+  return (
+    <div>
+      <h1>Welcome, {user.displayName}!</h1>
+      <button onClick={signOut}>Sign Out</button>
+    </div>
+  );
 }
+```
+
+### Server-Side Authentication
+API routes use JWT verification for secure access:
+
+```typescript
+import { requireAuth } from '@/lib/auth/server-auth';
+
+// Require authentication for API route
+export const POST = requireAuth(async (request, session) => {
+  // Access authenticated user
+  console.log('User ID:', session.user.uid);
+  console.log('Email:', session.user.email);
+  
+  return new Response('Authenticated response');
+});
+
+// Require specific role/permission
+import { requireRole } from '@/lib/auth/server-auth';
+
+export const DELETE = requireRole('admin', async (request, session) => {
+  // Only users with 'admin' role can access
+  return new Response('Admin-only response');
+});
+```
+
+## 🧩 Component Usage
+
+### Using AI Chat Hook
+The enhanced useChat hook provides optimistic updates and error handling:
+
+```tsx
+import { useChat } from '@/lib/hooks/useChat';
+
+function ChatComponent() {
+  const { messages, sendMessage, isLoading, error } = useChat('openai');
+  
+  const handleSend = async (content: string) => {
+    try {
+      await sendMessage(content);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  };
+  
+  return (
+    <div>
+      {messages.map(message => (
+        <div key={message.id} className={`message ${message.role}`}>
+          {message.content}
+        </div>
+      ))}
+      {isLoading && <div>AI is thinking...</div>}
+      {error && <div>Error: {error.message}</div>}
+    </div>
+  );
+}
+```
+
+### Using Async Boundaries
+Standardized loading and error states:
+
+```tsx
+import { AsyncBoundary } from '@/components/ui';
+
+function App() {
+  return (
+    <AsyncBoundary
+      fallback={<div>Loading chat...</div>}
+      errorFallback={({ error, retry }) => (
+        <div>
+          <p>Error: {error.message}</p>
+          <button onClick={retry}>Try Again</button>
+        </div>
+      )}
+    >
+      <ChatComponent />
+    </AsyncBoundary>
+  );
+}
+```
+
+### Using Validation Schemas
+Type-safe API validation:
+
+```typescript
+import { ChatRequestSchema, safeValidate } from '@/lib/validation';
+
+export async function POST(request: Request) {
+  const body = await request.json();
+  
+  // Validate and sanitize input
+  const validatedData = safeValidate(
+    ChatRequestSchema,
+    body,
+    'Chat API Request'
+  );
+  
+  // Use validated data
+  return processChat(validatedData);
+}
+```
+
+### Using Input Sanitization
+Secure user input handling:
+
+```typescript
+import { sanitizeInput } from '@/lib/validation/sanitization';
+
+// Sanitize different types of content
+const cleanText = sanitizeInput(userInput, 'TEXT_ONLY');
+const cleanHtml = sanitizeInput(htmlContent, 'BASIC_HTML');
+const cleanChat = sanitizeInput(chatMessage, 'CHAT_MESSAGE');
 ```
 
 ## 🎨 Styling

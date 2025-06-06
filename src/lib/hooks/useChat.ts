@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useOptimisticList } from './useOptimistic';
 import { useAPIClient } from '@/lib/api/client';
 import { Message } from '@/types/api';
@@ -10,9 +10,44 @@ export interface ChatMessage extends Message {
   status?: 'sending' | 'sent' | 'error';
 }
 
+/**
+ * Custom hook for managing AI chat interactions with optimistic updates
+ * 
+ * Provides real-time chat functionality with automatic retry, error handling,
+ * and optimistic UI updates for smooth user experience.
+ * 
+ * @param provider - AI provider to use ('openai' | 'anthropic' | 'lmstudio')
+ * @returns Chat state and actions for sending messages
+ * 
+ * @example
+ * ```tsx
+ * const { messages, sendMessage, clearMessages, isLoading } = useChat('openai');
+ * 
+ * const handleSend = async () => {
+ *   try {
+ *     await sendMessage('Hello, AI!');
+ *   } catch (error) {
+ *     console.error('Failed to send message:', error);
+ *   }
+ * };
+ * ```
+ */
 export function useChat(provider: 'openai' | 'anthropic' | 'lmstudio' = 'openai') {
   const { user } = useAuth();
   const apiClient = useAPIClient();
+  
+  // Memoize the SWR key to prevent unnecessary re-renders
+  const swrKey = useMemo(() => 
+    user ? `/api/chat/${provider}` : null, 
+    [user, provider]
+  );
+  
+  // Memoize SWR options to prevent recreation on every render
+  const swrOptions = useMemo(() => ({
+    fallbackData: [],
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  }), []);
   
   const {
     data: messages,
@@ -22,13 +57,9 @@ export function useChat(provider: 'openai' | 'anthropic' | 'lmstudio' = 'openai'
     updateItem,
     mutate,
   } = useOptimisticList<ChatMessage>(
-    user ? `/api/chat/${provider}` : null,
+    swrKey,
     null, // We'll manage messages locally
-    {
-      fallbackData: [],
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
+    swrOptions
   );
 
   const sendMessage = useCallback(
@@ -131,11 +162,12 @@ export function useChat(provider: 'openai' | 'anthropic' | 'lmstudio' = 'openai'
     await mutate([]);
   }, [mutate]);
 
-  return {
+  // Memoize the return object to prevent unnecessary re-renders of components using this hook
+  return useMemo(() => ({
     messages: messages || [],
     error,
     isLoading,
     sendMessage,
     clearMessages,
-  };
+  }), [messages, error, isLoading, sendMessage, clearMessages]);
 }

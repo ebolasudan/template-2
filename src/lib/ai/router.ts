@@ -1,3 +1,26 @@
+/**
+ * AI Router Module - Intelligent provider selection and failover
+ * 
+ * This module provides smart routing between different AI providers based on
+ * availability, cost, performance, and specific requirements. It includes
+ * automatic failover, load balancing, and optimization strategies.
+ * 
+ * @example
+ * ```typescript
+ * import { AIRouter } from '@/lib/ai/router';
+ * 
+ * const router = new AIRouter({
+ *   defaultProvider: 'auto',
+ *   fallbackEnabled: true,
+ *   costOptimization: true
+ * });
+ * 
+ * const stream = await router.chat({
+ *   messages: [{ role: 'user', content: 'Hello!' }]
+ * });
+ * ```
+ */
+
 import { Message, ChatRequest } from '@/types/api';
 import { env, hasOpenAI, hasAnthropic, hasLMStudio } from '@/lib/env';
 import { ConfigurationError } from '@/lib/errors';
@@ -102,7 +125,28 @@ export class AIRouter {
     return providers;
   }
 
-  // Select the best provider based on request and configuration
+  /**
+   * Select the best AI provider based on request requirements and configuration
+   * 
+   * This method implements intelligent provider selection using multiple criteria:
+   * - Cost optimization (if enabled)
+   * - Load balancing (if enabled) 
+   * - Capability requirements (context length, vision, etc.)
+   * - Provider availability and health
+   * 
+   * @param request - The chat request to analyze for provider selection
+   * @returns The selected AI provider name
+   * @throws ConfigurationError if no providers are available
+   * 
+   * @example
+   * ```typescript
+   * const provider = router.selectProvider({
+   *   messages: [{ role: 'user', content: 'Long text requiring large context...' }],
+   *   model: 'auto'
+   * });
+   * console.log(`Selected provider: ${provider}`);
+   * ```
+   */
   selectProvider(request: ChatRequest): AIProvider {
     const availableProviders = this.getAvailableProviders();
     

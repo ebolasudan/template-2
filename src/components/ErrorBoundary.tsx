@@ -1,26 +1,68 @@
+/**
+ * Enhanced ErrorBoundary component with recovery mechanisms and detailed error reporting
+ * 
+ * This component provides a comprehensive error boundary that catches JavaScript errors
+ * anywhere in the child component tree, logs errors, and displays a fallback UI.
+ * 
+ * Features:
+ * - Automatic error reporting and logging
+ * - Retry mechanisms with exponential backoff
+ * - Development vs production error displays
+ * - Request ID tracking for debugging
+ * - Custom error fallback components
+ * 
+ * @example
+ * ```tsx
+ * <ErrorBoundary
+ *   fallback={<CustomErrorComponent />}
+ *   onError={(error, errorInfo) => sendToAnalytics(error)}
+ * >
+ *   <MyComponent />
+ * </ErrorBoundary>
+ * ```
+ */
+
 'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode, memo } from 'react';
+import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  enableRetry?: boolean;
+  maxRetries?: number;
+  resetKeys?: (string | number)[];
+  isolate?: boolean;
+  level?: 'page' | 'section' | 'component';
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  retryCount: number;
+  errorId: string;
+}
+
+/**
+ * Generate unique error ID for tracking
+ */
+function generateErrorId(): string {
+  return `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
+  private resetTimeoutId: number | null = null;
+
   public state: State = {
     hasError: false,
     error: null,
     errorInfo: null,
+    retryCount: 0,
+    errorId: '',
   };
 
   public static getDerivedStateFromError(error: Error): State {

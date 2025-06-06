@@ -13,6 +13,7 @@
     "clean": "rm -rf .next node_modules/.cache",
     "clean:all": "rm -rf .next node_modules package-lock.json && npm install",
     "analyze": "ANALYZE=true next build",
+    "analyze:bundle": "npx webpack-bundle-analyzer .next/static/chunks/*.js",
     "check:env": "node -e \"require('./src/lib/env')\" && echo '✅ Environment variables validated'",
     "create:component": "node scripts/create-component.js",
     "create:api": "node scripts/create-api-route.js",
@@ -25,15 +26,20 @@
     "ai": "^3.3.20",
     "date-fns": "^3.6.0",
     "firebase": "^10.13.0",
+    "firebase-admin": "^11.11.1",
     "framer-motion": "^11.3.31",
+    "ioredis": "^5.3.2",
+    "isomorphic-dompurify": "^2.4.0",
     "lucide-react": "^0.436.0",
     "next": "14.2.7",
     "react": "^18",
     "react-dom": "^18",
     "react-markdown": "^9.0.1",
-    "replicate": "^0.32.0"
+    "replicate": "^0.32.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -41,6 +47,7 @@
     "eslint-config-next": "14.2.7",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack-bundle-analyzer": "^4.9.1"
   }
 }
