@@ -9,6 +9,7 @@ A modern, production-ready template for building AI-powered applications with Ne
 - **Multiple AI Integrations**:
   - OpenAI GPT-4o for chat completions
   - Anthropic Claude 3.5 Sonnet for advanced reasoning
+  - LM Studio for local LLM inference (privacy-focused)
   - Replicate Stable Diffusion for image generation
   - Deepgram for real-time audio transcription
 - **Firebase Suite**:
@@ -55,6 +56,10 @@ A modern, production-ready template for building AI-powered applications with Ne
    ANTHROPIC_API_KEY=your_anthropic_api_key
    REPLICATE_API_TOKEN=your_replicate_api_token
    DEEPGRAM_API_KEY=your_deepgram_api_key
+   
+   # LM Studio (for local LLM inference)
+   LM_STUDIO_BASE_URL=http://localhost:1234
+   LM_STUDIO_API_KEY=optional_api_key
    ```
 
 4. **Configure Firebase**
@@ -109,6 +114,7 @@ src/
 ### Chat Completions
 - **POST `/api/openai/chat`** - Stream chat responses from GPT-4o
 - **POST `/api/anthropic/chat`** - Stream chat responses from Claude 3.5 Sonnet
+- **POST `/api/lmstudio/chat`** - Stream chat responses from local LLM via LM Studio
 
 ### Image Generation
 - **POST `/api/replicate/generate-image`** - Generate images with Stable Diffusion
@@ -182,6 +188,8 @@ This template uses Tailwind CSS for styling. The configuration is in `tailwind.c
 | `ANTHROPIC_API_KEY` | Anthropic API key | If using Claude |
 | `REPLICATE_API_TOKEN` | Replicate API token | If using image generation |
 | `DEEPGRAM_API_KEY` | Deepgram API key | If using transcription |
+| `LM_STUDIO_BASE_URL` | LM Studio server URL | If using local LLM |
+| `LM_STUDIO_API_KEY` | LM Studio API key (optional) | If LM Studio requires auth |
 
 ## 🤝 Contributing
 

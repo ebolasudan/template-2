@@ -1,8 +1,8 @@
 import { Message, ChatRequest } from '@/types/api';
-import { env, hasOpenAI, hasAnthropic } from '@/lib/env';
+import { env, hasOpenAI, hasAnthropic, hasLMStudio } from '@/lib/env';
 import { ConfigurationError } from '@/lib/errors';
 
-export type AIProvider = 'openai' | 'anthropic' | 'auto';
+export type AIProvider = 'openai' | 'anthropic' | 'lmstudio' | 'auto';
 
 export interface AIRouterConfig {
   defaultProvider?: AIProvider;
@@ -48,6 +48,17 @@ const PROVIDER_INFO: Record<Exclude<AIProvider, 'auto'>, Omit<AIProviderInfo, 'a
       maxTokens: 200000,
     },
   },
+  lmstudio: {
+    name: 'lmstudio',
+    costPerToken: 0, // Local models are free
+    speed: 'medium', // Depends on hardware
+    capabilities: {
+      streaming: true,
+      functionCalling: false, // Most local models don't support function calling
+      vision: false, // Depends on the loaded model
+      maxTokens: 32000, // Depends on the loaded model, conservative estimate
+    },
+  },
 };
 
 export class AIRouter {
@@ -77,6 +88,13 @@ export class AIRouter {
     if (hasAnthropic()) {
       providers.push({
         ...PROVIDER_INFO.anthropic,
+        available: true,
+      });
+    }
+
+    if (hasLMStudio()) {
+      providers.push({
+        ...PROVIDER_INFO.lmstudio,
         available: true,
       });
     }
@@ -217,7 +235,21 @@ export class AIRouter {
 
   // Execute chat request with specific provider
   private async executeChatRequest(provider: AIProvider, request: ChatRequest): Promise<ReadableStream> {
-    const endpoint = provider === 'openai' ? '/api/openai/chat' : '/api/anthropic/chat';
+    let endpoint: string;
+    
+    switch (provider) {
+      case 'openai':
+        endpoint = '/api/openai/chat';
+        break;
+      case 'anthropic':
+        endpoint = '/api/anthropic/chat';
+        break;
+      case 'lmstudio':
+        endpoint = '/api/lmstudio/chat';
+        break;
+      default:
+        throw new Error(`Unsupported provider: ${provider}`);
+    }
     
     const response = await fetch(endpoint, {
       method: 'POST',

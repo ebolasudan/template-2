@@ -7,6 +7,8 @@ import {
   TranscriptionResponse,
   DeepgramConfig,
   DeepgramResponse,
+  LMStudioRequest,
+  LMStudioResponse,
   APIError,
   APIResponse,
   isAPIError
@@ -91,6 +93,13 @@ export class APIClient {
     });
   }
 
+  async chatWithLMStudio(request: LMStudioRequest): Promise<APIResponse<LMStudioResponse>> {
+    return this.request<LMStudioResponse>('/api/lmstudio/chat', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
   // Streaming chat APIs
   async streamChatWithOpenAI(request: ChatRequest): Promise<ReadableStream> {
     const response = await fetch('/api/openai/chat', {
@@ -108,6 +117,20 @@ export class APIClient {
 
   async streamChatWithAnthropic(request: ChatRequest): Promise<ReadableStream> {
     const response = await fetch('/api/anthropic/chat', {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify({ ...request, stream: true }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.statusText}`);
+    }
+
+    return response.body!;
+  }
+
+  async streamChatWithLMStudio(request: LMStudioRequest): Promise<ReadableStream> {
+    const response = await fetch('/api/lmstudio/chat', {
       method: 'POST',
       headers: this.headers,
       body: JSON.stringify({ ...request, stream: true }),

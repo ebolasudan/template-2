@@ -31,6 +31,7 @@ This is a Next.js 14 full-stack template designed for rapid AI application devel
 1. **Chat APIs** (using Vercel AI SDK for streaming):
    - OpenAI GPT-4o: `/api/openai/chat`
    - Anthropic Claude 3.5 Sonnet: `/api/anthropic/chat`
+   - LM Studio (Local LLM): `/api/lmstudio/chat`
 
 2. **Image Generation**:
    - Replicate Stable Diffusion: `/api/replicate/generate-image`
@@ -66,7 +67,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID
 # AI Service API Keys
 REPLICATE_API_TOKEN
 DEEPGRAM_API_KEY
-# OpenAI and Anthropic keys are also required but not explicitly shown in code
+# AI Service Keys
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+LM_STUDIO_BASE_URL
+LM_STUDIO_API_KEY
 ```
 
 ### Key Technical Details

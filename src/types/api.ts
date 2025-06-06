@@ -87,6 +87,58 @@ export interface DeepgramResponse {
   options: DeepgramConfig;
 }
 
+// LM Studio Types
+export interface LMStudioConfig {
+  baseUrl: string;
+  apiKey?: string;
+  model?: string;
+  timeout?: number;
+}
+
+export interface LMStudioRequest extends ChatRequest {
+  // LM Studio specific parameters
+  top_p?: number;
+  top_k?: number;
+  repeat_penalty?: number;
+  stop?: string[];
+}
+
+export interface LMStudioResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: LMStudioChoice[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
+export interface LMStudioChoice {
+  index: number;
+  message: Message;
+  finish_reason: string;
+}
+
+export interface LMStudioStreamChunk {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: LMStudioStreamChoice[];
+}
+
+export interface LMStudioStreamChoice {
+  index: number;
+  delta: {
+    role?: string;
+    content?: string;
+  };
+  finish_reason?: string;
+}
+
 // Error Response Types
 export interface APIError {
   error: {

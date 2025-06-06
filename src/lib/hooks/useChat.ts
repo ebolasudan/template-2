@@ -10,7 +10,7 @@ export interface ChatMessage extends Message {
   status?: 'sending' | 'sent' | 'error';
 }
 
-export function useChat(provider: 'openai' | 'anthropic' = 'openai') {
+export function useChat(provider: 'openai' | 'anthropic' | 'lmstudio' = 'openai') {
   const { user } = useAuth();
   const apiClient = useAPIClient();
   
@@ -61,13 +61,23 @@ export function useChat(provider: 'openai' | 'anthropic' = 'openai') {
 
       try {
         // Get streaming response
-        const stream = provider === 'openai' 
-          ? await apiClient.streamChatWithOpenAI({
-              messages: [...(messages || []), userMessage].map(({ role, content }) => ({ role, content })),
-            })
-          : await apiClient.streamChatWithAnthropic({
-              messages: [...(messages || []), userMessage].map(({ role, content }) => ({ role, content })),
-            });
+        let stream: ReadableStream;
+        
+        const chatMessages = [...(messages || []), userMessage].map(({ role, content }) => ({ role, content }));
+        
+        switch (provider) {
+          case 'openai':
+            stream = await apiClient.streamChatWithOpenAI({ messages: chatMessages });
+            break;
+          case 'anthropic':
+            stream = await apiClient.streamChatWithAnthropic({ messages: chatMessages });
+            break;
+          case 'lmstudio':
+            stream = await apiClient.streamChatWithLMStudio({ messages: chatMessages });
+            break;
+          default:
+            throw new Error(`Unsupported provider: ${provider}`);
+        }
 
         // Process stream
         const reader = stream.getReader();

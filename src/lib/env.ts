@@ -15,6 +15,10 @@ export interface EnvConfig {
   REPLICATE_API_TOKEN?: string;
   DEEPGRAM_API_KEY?: string;
   
+  // Local LLM via LM Studio
+  LM_STUDIO_BASE_URL?: string;
+  LM_STUDIO_API_KEY?: string;
+  
   // App Configuration
   NEXT_PUBLIC_APP_URL?: string;
 }
@@ -51,6 +55,7 @@ function validateEnv(): EnvConfig {
     'ANTHROPIC_API_KEY',
     'REPLICATE_API_TOKEN',
     'DEEPGRAM_API_KEY',
+    'LM_STUDIO_BASE_URL',
   ] as const;
 
   const missingAIServices: string[] = [];
@@ -88,6 +93,10 @@ function validateEnv(): EnvConfig {
     REPLICATE_API_TOKEN: process.env.REPLICATE_API_TOKEN,
     DEEPGRAM_API_KEY: process.env.DEEPGRAM_API_KEY,
     
+    // Local LLM via LM Studio
+    LM_STUDIO_BASE_URL: process.env.LM_STUDIO_BASE_URL,
+    LM_STUDIO_API_KEY: process.env.LM_STUDIO_API_KEY,
+    
     // App Configuration
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   };
@@ -101,12 +110,14 @@ export const hasOpenAI = () => Boolean(env.OPENAI_API_KEY);
 export const hasAnthropic = () => Boolean(env.ANTHROPIC_API_KEY);
 export const hasReplicate = () => Boolean(env.REPLICATE_API_TOKEN);
 export const hasDeepgram = () => Boolean(env.DEEPGRAM_API_KEY);
+export const hasLMStudio = () => Boolean(env.LM_STUDIO_BASE_URL);
 
 export const getAvailableAIServices = () => ({
   openai: hasOpenAI(),
   anthropic: hasAnthropic(),
   replicate: hasReplicate(),
   deepgram: hasDeepgram(),
+  lmstudio: hasLMStudio(),
 });
 
 // Export a safe version of env for client-side use
